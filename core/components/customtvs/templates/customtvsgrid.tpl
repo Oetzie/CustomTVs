@@ -92,7 +92,7 @@
 	        id			: 'customtvs-{/literal}{$tv->id}{literal}-grid-tv',
 	        fields		: this.getColumnFields(),
 			store		: this.store,
-			width		: '650px',
+			width		: 650,
 	        remoteSort	: true
 	    });
 	
@@ -110,16 +110,22 @@
 					editable	: false
 				}, columns[i]);
 				
-				if ('boolean' == column.renderer) {
-					column.renderer = this.renderBoolean;
-				} else if ('image' == column.renderer) {
-					column.renderer = this.renderImage;
-				} else if ('url' == column.renderer) {
-					column.renderer = this.renderUrl;
-				} else if ('tag' == column.renderer) {
-					column.renderer = this.renderTag;
-				} else if ('password' == column.renderer) {
-					column.renderer = this.renderPassword;
+				if (column.renderer) {
+					column.scope = this;
+					
+					if ('boolean' == column.renderer) {
+						column.renderer = this.renderBoolean;
+					} else if ('image' == column.renderer) {
+						column.renderer = this.renderImage;
+					} else if ('youtube' == column.renderer) {
+						column.renderer = this.renderYoutube;
+					} else if ('url' == column.renderer) {
+						column.renderer = this.renderUrl;
+					} else if ('tag' == column.renderer) {
+						column.renderer = this.renderTag;
+					} else if ('password' == column.renderer) {
+						column.renderer = this.renderPassword;
+					}
 				}
 				
 				output.push(column);
@@ -234,16 +240,31 @@
 	    	return 1 == parseInt(d) || d ? _('yes') : _('no');
 	    },
 	    renderImage: function(d, c) {
-	    	if (/^(http|https)/.test(d)) {
-	    		return '<img style="height: 60px" src="' + d + '" />' ;
-	    	}
+	    	var regExp = /^(http|https|www)/;
 	    	
-	    	if ('' != d) {
-	    		return '<img src="' + MODx.config.connectors_url + 'system/phpthumb.php?h=60&src=' + d + '" alt="" />';
-
+	    	if (regExp.test(d) || '' != d) {
+	    		if (false == regExp.test(d)) {
+	    			d = MODx.config.connectors_url + 'system/phpthumb.php?w=110&h=70&zc=1&src=' + d;
+	    		}
+	    		
+	    		return '<img src="' + d + '" style="display: block; width: 110px; height: 70px; margin: 0 auto;" alt="" />' ;
 	    	}
 	    	
 	    	return d;
+	    },
+	    renderYoutube: function(d, c) {
+	    	var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+			var match = d.match(regExp);
+			
+			if (match && 11 == match[7].length || 11 == d.length) {
+				if (11 != d.length) {
+					d = match[7];
+				}
+				
+				return '<iframe width="110" height="70" src="//www.youtube.com/embed/' + d +'?controls=0&rel=0&showinfo=0" frameborder="0" style="display: block; width: 110px; height: 70px; margin: 0 auto;"></iframe>';
+			}
+	    	
+	    	return this.renderUrl(d, c);
 	    },
 	    renderUrl: function(d, c) {
 	    	if ('' != d) {
