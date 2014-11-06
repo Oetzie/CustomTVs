@@ -1,6 +1,5 @@
 <?php
-
-	/**
+/**
 	 * Custom TVs
 	 *
 	 * Copyright 2014 by Oene Tjeerd de Bruin <info@oetzie.nl>
@@ -55,10 +54,15 @@
 
 		if (null !== ($resource = $modx->getObject('modResource', $modx->getOption('parent', $scriptProperties, $modx->resource->id)))) {
 			$templateVar = $resource->getTVValue(is_numeric($tvID) ? (int) $tvID : $tvID);
+			$templateVarValues = $modx->fromJSON('' != $templateVar ? $templateVar : '[]');
+
+			if ('RAND' == $modx->getOption('order', $scriptProperties, null)) {
+				shuffle($templateVarValues);
+			}
 
 			$output = array();
 
-			foreach ($modx->fromJSON('' != $templateVar ? $templateVar : '[]') as $key => $value) {
+			foreach ($templateVarValues as $key => $value) {
 				$output[] = customTVsGridParseTemplate($modx->getOption('tpl', $scriptProperties, null), $value);
 
 				if (null !== $limit && $limit <= count($output)) {

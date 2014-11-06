@@ -93,7 +93,13 @@
 	        fields		: this.getColumnFields(),
 			store		: this.store,
 			width		: 650,
-	        remoteSort	: true
+	        remoteSort	: true,
+	        listeners	: {
+	        	'afteredit'	: {
+	        		fn			: this.encodeData,
+	        		scope		: this
+	        	}
+	        }
 	    });
 	
 	    CustomTVs{/literal}{$tv->id}{literal}.grid.GridTV.superclass.constructor.call(this, config);
@@ -106,8 +112,7 @@
 			
 			for (i = 0; i < columns.length; i++) {
 				var column = Ext.applyIf({
-					sortable	: false,
-					editable	: false
+					sortable	: false
 				}, columns[i]);
 				
 				if (column.renderer) {
@@ -294,7 +299,7 @@
 			var data = this.getStore().data;
 		    
 		    for (i = 0; i <  data.length; i++) {
-	 			items.push(Ext.applyIf({idx : i}, data.items[i].json));
+	 			items.push(Ext.applyIf({idx : i}, data.items[i].data));
 	        }
 
 	        if (0 == items.length){
@@ -522,7 +527,7 @@
 	        var f = this.fp.getForm();
 	        
 	        if (f.isValid() && this.fireEvent('beforeSubmit', f.getValues())) {
-	        	this.config.scope.getStore().getAt(f.getValues().idx).json = f.getValues();
+	        	this.config.scope.getStore().getAt(f.getValues().idx).data = f.getValues();
 	        
 	        	if (this.config.success) {
 	            	Ext.callback(this.config.success, this.config.scope || this, [f]);
