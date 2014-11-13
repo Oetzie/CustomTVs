@@ -58,11 +58,6 @@
 				'snippetsPath' 			=> $corePath.'elements/snippets/',
 				'tvsPath' 				=> $corePath.'elements/tvs/',
 				'templatesPath' 		=> $corePath.'templates/',
-				'assetsPath' 			=> $assetsPath,
-				'jsUrl' 				=> $assetsUrl.'js/',
-				'cssUrl' 				=> $assetsUrl.'css/',
-				'assetsUrl' 			=> $assetsUrl,
-				'connectorUrl'			=> $assetsUrl.'connector.php',
 				'helpurl'				=> 'customtvs'
 			), $config);
 		
@@ -76,6 +71,37 @@
 		public function getHelpUrl() {
 			return $this->config['helpurl'];
 		}
+		
+		/**
+		 * @acces public.
+		 * @param String $tpl.
+		 * @param Array $properties.
+		 * @param String $type.
+		 * @return String.
+		 */
+		public function getTpl($tpl, $properties = array(), $type = 'chunk') {
+		  	if (0 === strpos($tpl, '@')) {
+			  	$type 	= substr($tpl, 1, strpos($tpl, ':') - 1);
+			  	$tpl	= substr($tpl, strpos($tpl, ':') + 1, strlen($tpl));
+		  	}
+  
+		  	switch (strtolower($type)) {
+			  	case 'inline':
+				  	$chunk = $this->modx->newObject('modChunk', array('name' => sprintf('customtvs-%s', uniqid())));
+  
+				  	$chunk->setCacheable(false);
+  
+				  	$output = $chunk->process($properties, $tpl);
+  
+				  	break;
+			  	case 'chunk':
+				  	$output = $this->modx->getChunk($tpl, $properties);
+  
+				  	break;
+		  	}
+  
+		  	return $output;
+	  	}
 	}
 	
 ?>
