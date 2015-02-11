@@ -380,7 +380,7 @@
 				var element = Ext.applyIf({}, _elements[i]);
 				
 				element = Ext.applyIf(element, {
-					id			: 'customtvs-{/literal}{$tv->id}{literal}-' + _elements[i].xtype + '-' + _elements[i].name,
+					id			: 'customtvs-{/literal}{$tv->id}{literal}-create-' + _elements[i].xtype + '-' + _elements[i].name,
 					xtype		: 'textfield',
 					anchor		: '100%',
 					description	: MODx.expandHelp ? '' : element.description
@@ -534,7 +534,7 @@
 				var element = Ext.applyIf({}, _elements[i]);
 				
 				element = Ext.applyIf(element, {
-					id			: 'customtvs-{/literal}{$tv->id}{literal}-' + _elements[i].xtype + '-' + _elements[i].name,
+					id			: 'customtvs-{/literal}{$tv->id}{literal}-update-' + _elements[i].xtype + '-' + _elements[i].name,
 					xtype		: 'textfield',
 					anchor		: '100%',
 					description	: MODx.expandHelp ? '' : element.description
