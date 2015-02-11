@@ -16,8 +16,8 @@
 	];
 	var defaultGridElements = [
 		'',
-		'[{"header" : "Afbeelding", "dataIndex" : "image", "width" : 150, "fixed" : true, "renderer" : "image"},{"header" : "Name", "dataIndex" : "name", "width" : 100}]',
-		'[{"header" : "Afbeelding", "dataIndex" : "image", "width" : 150, "fixed" : true, "renderer" : "image"},{"header" : "Name", "dataIndex" : "name", "width" : 100}]'
+		'[{"header" : "Image", "dataIndex" : "image", "width" : 150, "fixed" : true, "renderer" : "image"},{"header" : "Name", "dataIndex" : "name", "width" : 100}]',
+		'[{"header" : "Image", "dataIndex" : "image", "width" : 150, "fixed" : true, "renderer" : "image"},{"header" : "Name", "dataIndex" : "name", "width" : 100}]'
 	];
 	
 	var listeners = {
@@ -97,6 +97,20 @@
         }, {
         	xtype			: MODx.expandHelp ? 'label' : 'hidden',
             html			: '{/literal}{$customtvs.label_grid_elements_desc}{literal}',
+            cls				: 'desc-under'
+        }, {
+        	xtype			: 'combo-boolean',
+        	fieldLabel		: '{/literal}{$customtvs.label_sortable}{literal}',
+        	description		: MODx.expandHelp ? '' : '{/literal}{$customtvs.label_sortable_desc}{literal}',
+			name			: 'inopt_grid_sortable',
+			hiddenName		: 'inopt_grid_sortable',
+        	anchor			: '60%',
+        	allowBlank		: true,
+        	value			: params['grid_sortable'],
+        	listeners		: listeners
+        }, {
+        	xtype			: MODx.expandHelp ? 'label' : 'hidden',
+            html			: '{/literal}{$customtvs.label_sortable_desc}{literal}',
             cls				: 'desc-under'
         }],
         renderTo: 'customtvs-{/literal}{$tv}{literal}-properties-div'

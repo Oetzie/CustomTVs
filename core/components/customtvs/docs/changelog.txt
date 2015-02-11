@@ -3,6 +3,17 @@ CustomTVs
 ----------------------
 
 ----------------------
+Version: 1.0.1
+Released: 2015-02-11
+----------------------
+- Bugfixes
+- Grid sortorder added
+- New form/grid types added
+	- 'Select from resource from tree' type
+	- Media browser type
+	- Date / time type
+
+----------------------
 Version: 1.0.0
 Released: 2014-10-28
 ----------------------

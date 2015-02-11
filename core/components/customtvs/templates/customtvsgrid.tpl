@@ -82,7 +82,7 @@
 
 		this.store = new Ext.data.JsonStore({
 	    	fields		: this.getColumnFields(),
-	    	data		: Ext.util.JSON.decode(Ext.get('tv' + {/literal}{$tv->id}{literal}).dom.value || "[]"),
+	    	data		: Ext.decode(Ext.get('tv' + {/literal}{$tv->id}{literal}).dom.value || "[]"),
 	    	remoteSort	: true
 		});
 
@@ -94,11 +94,17 @@
 			store		: this.store,
 			width		: 650,
 	        remoteSort	: true,
+	        enableDragDrop : CustomTVs{/literal}{$tv->id}{literal}.config.grid_sortable,
+	        ddGroup 	: 'customtvs-{/literal}{$tv->id}{literal}-grid-tv', 
 	        listeners	: {
 	        	'afteredit'	: {
 	        		fn			: this.encodeData,
 	        		scope		: this
-	        	}
+	        	},
+	        	'afterrender' : {
+	               fn			: this.ddData,
+	               scope		: this
+	           }
 	        }
 	    });
 	
@@ -107,13 +113,13 @@
 	
 	Ext.extend(CustomTVs{/literal}{$tv->id}{literal}.grid.GridTV, MODx.grid.LocalGrid, {
 		getColumns: function() {
-			var output = [];
-			var columns = CustomTVs{/literal}{$tv->id}{literal}.config.grid_elements;
+			var columns = [];
+			var _columns = CustomTVs{/literal}{$tv->id}{literal}.config.grid_elements;
 			
-			for (i = 0; i < columns.length; i++) {
+			for (i = 0; i < _columns.length; i++) {
 				var column = Ext.applyIf({
 					sortable	: false
-				}, columns[i]);
+				}, _columns[i]);
 				
 				if (column.renderer) {
 					column.scope = this;
@@ -130,34 +136,36 @@
 						column.renderer = this.renderTag;
 					} else if ('password' == column.renderer) {
 						column.renderer = this.renderPassword;
+					} else if ('resource' == column.renderer) {
+						column.renderer = this.renderResource;
 					}
 				}
 				
-				output.push(column);
+				columns.push(column);
 			}
 			
-			return output;
+			return columns;
 		},
 		getColumnFields: function() {
 			var columns = ['idx'];
-			var gridElements = CustomTVs{/literal}{$tv->id}{literal}.config.grid_elements;
+			var elements = CustomTVs{/literal}{$tv->id}{literal}.config.grid_elements;
 			
-			for (i = 0; i < gridElements.length; i++) {
-				columns.push(gridElements[i].dataIndex);
+			for (i = 0; i < elements.length; i++) {
+				columns.push(elements[i].dataIndex);
 			}
 			
-			var formElements = CustomTVs{/literal}{$tv->id}{literal}.config.form_elements;
+			var elements = CustomTVs{/literal}{$tv->id}{literal}.config.form_elements;
 			
-			for (i = 0; i < formElements.length; i++) {
-				var formElement = formElements[i];
+			for (i = 0; i < elements.length; i++) {
+				var element = elements[i];
 				
-				if (-1 == columns.indexOf(formElement.name)) {
-					columns.push(formElement.name);
+				if (-1 == columns.indexOf(element.name)) {
+					columns.push(element.name);
 				}
 				
-				if ('modx-combo' == formElement.xtype) {
-					if (-1 == columns.indexOf(formElement.name + '_replace')) {
-						columns.push(formElement.name + '_replace');
+				if (-1 != ['modx-combo', 'modx-combo-browser', 'modx-field-parent-change'].indexOf(element.xtype)) {
+					if (-1 == columns.indexOf(element.name + '_replace')) {
+						columns.push(element.name + '_replace');
 					}
 				}
 			}
@@ -239,12 +247,12 @@
 	    	this.getStore().removeAt(this.menu.recordIndex);
 	    	this.encodeData();
 	    },
-	    renderBoolean: function(d, c) {
+	    renderBoolean: function(d, c, e) {
 	    	c.css = 1 == parseInt(d) || d ? 'green' : 'red';
 	    	
 	    	return 1 == parseInt(d) || d ? _('yes') : _('no');
 	    },
-	    renderImage: function(d, c) {
+	    renderImage: function(d, c, e) {
 	    	var regExp = /^(http|https|www)/;
 	    	
 	    	if (regExp.test(d) || '' != d) {
@@ -257,7 +265,7 @@
 	    	
 	    	return d;
 	    },
-	    renderYoutube: function(d, c) {
+	    renderYoutube: function(d, c, e) {
 	    	var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
 			var match = d.match(regExp);
 			
@@ -269,23 +277,23 @@
 				return '<iframe width="110" height="70" src="//www.youtube.com/embed/' + d +'?controls=0&rel=0&showinfo=0" frameborder="0" style="display: block; width: 110px; height: 70px; margin: 0 auto;"></iframe>';
 			}
 	    	
-	    	return this.renderUrl(d, c);
+	    	return this.renderUrl(d, c, e);
 	    },
-	    renderUrl: function(d, c) {
+	    renderUrl: function(d, c, e) {
 	    	if ('' != d) {
         		return '<a href="' + d + '" target="_blank">' + d + '</a>';
         	}
         	
         	return d;
 		},
-		renderTag: function(d, c) {
+		renderTag: function(d, c, e) {
 			if ('' != d) {
 				return '[[+' + d + '+]]';
 			}
 			
 			return d;
 		},
-		renderPassword: function(d, c) {
+		renderPassword: function(d, c, e) {
         	var value = '';
 			
 			for (i = 0; i < d.length; i++) {
@@ -294,23 +302,54 @@
 			
         	return value;
 		},
-	    encodeData: function() {
-	    	var items = [];
-			var data = this.getStore().data;
-		    
-		    for (i = 0; i <  data.length; i++) {
-	 			items.push(Ext.applyIf({idx : i}, data.items[i].data));
-	        }
+		renderResource: function(d, c, e) {
+			var key = Object.keys(e.data).filter(function(key) {return e.data[key] === d})[0];
+			
+			if (undefined != key) {
+				return '<a href="?a=resource/update&id=' + d + '" target="_blank">' + e.data[key + '_replace'] + '</a>';
+			}
 
-	        if (0 == items.length){
-	        	Ext.get('tv' + {/literal}{$tv->id}{literal}).dom.value = ''; 
-	        } else {
-	        	Ext.get('tv' + {/literal}{$tv->id}{literal}).dom.value = Ext.util.JSON.encode(items); 
+        	return d;
+		},
+	    encodeData: function() {
+	    	var data = [];
+
+		    for (i = 0; i <  this.getStore().data.length; i++) {
+	 			data.push(Ext.applyIf({idx : i}, this.getStore().data.items[i].data));
 	        }
 	        
-	        this.getStore().loadData(items);
+	        //if (0 == items.length){
+	        //	Ext.get('tv' + {/literal}{$tv->id}{literal}).dom.value = ''; 
+	        //} else {
+	        	Ext.get('tv' + {/literal}{$tv->id}{literal}).dom.value = Ext.encode(data); 
+	        //}
+
+	        this.getStore().loadData(data);
 	        this.getView().refresh();
-	    }
+	    },
+	    ddData: function() {
+		    var grid = this;
+		    
+			var ddrow = new Ext.dd.DropTarget(this.getView().mainBody, {
+	        	ddGroup 	: 'customtvs-{/literal}{$tv->id}{literal}-grid-tv',
+	            notifyDrop 	: function(dd, e, data) {
+	            	var sm = grid.getSelectionModel();
+	                var sels = sm.getSelections();
+	                var cindex = dd.getDragData(e).rowIndex;
+	                
+	                if (sm.hasSelection()) {
+	                	for (i = 0; i < sels.length; i++) {
+	                    	grid.getStore().remove(grid.getStore().getById(sels[i].id));
+	                        grid.getStore().insert(cindex, sels[i]);
+	                    }
+	                    
+	                    sm.selectRecords(sels);
+	                    
+	                    grid.encodeData();
+	                }
+	            }
+	        });
+		}
 	});
 	
 	Ext.reg('customtvs-{/literal}{$tv->id}{literal}-grid-tv', CustomTVs{/literal}{$tv->id}{literal}.grid.GridTV);
@@ -320,63 +359,73 @@
 	    
 	    Ext.applyIf(config, {
 	    	autoHeight	: true,
+	    	id			: 'customtvs-{/literal}{$tv->id}{literal}-create-form-panel',
 	        title 		: _('customtvs.item_create'),
 	        defauls		: {
 		        labelAlign	: 'top',
 	            border		: false
 	        },
-	        fields		: this.getFields()
+	        fields		: this.getElements()
 	    });
 	    
 	    CustomTVs{/literal}{$tv->id}{literal}.window.CreateItem.superclass.constructor.call(this, config);
 	};
 	
 	Ext.extend(CustomTVs{/literal}{$tv->id}{literal}.window.CreateItem, MODx.Window, {
-		getFields: function() {
-			var output = [];
-			var fields = CustomTVs{/literal}{$tv->id}{literal}.config.form_elements;
-			
-			for (i = 0; i < fields.length; i++) {
-				var field = Ext.applyIf(fields[i], {
-					id			: 'customtvs-{/literal}{$tv->id}{literal}-' + fields[i].xtype + '-' + fields[i].name,
+		getElements: function() {
+			var elements = [];
+			var _elements = CustomTVs{/literal}{$tv->id}{literal}.config.form_elements;
+
+			for (i = 0; i < _elements.length; i++) {
+				var element = Ext.applyIf({}, _elements[i]);
+				
+				element = Ext.applyIf(element, {
+					id			: 'customtvs-{/literal}{$tv->id}{literal}-' + _elements[i].xtype + '-' + _elements[i].name,
 					xtype		: 'textfield',
 					anchor		: '100%',
-					description	: ''
+					description	: MODx.expandHelp ? '' : element.description
 				});
-				
-				if ('checkbox' == field.xtype) {
-					field = Ext.applyIf(field, {
+
+				if ('checkbox' == element.xtype) {
+					element = Ext.applyIf({
 						inputValue	: 1
+					}, element);
+				} else if ('modx-combo-browser' == element.xtype) {
+					elements.push({
+						name		: element.name,
+						xtype		: 'hidden',
+						id			: element.id + '_replace',
 					});
-				} else if ('modx-combo-browser' == field.xtype) {
-					field = Ext.applyIf(field, {
+					
+					element = Ext.applyIf({
+						name		: element.name + '_replace',
 						source		: MODx.config.default_media_source,
 						listeners	: {
 							'select'	: {
 								fn			: function(data) {
-									this.setValue(data.fullRelativeUrl);
+									Ext.getCmp(this.config.id + '_replace').setValue(data.fullRelativeUrl);
 								}
 							}
 						}
-					});
-				} else if ('modx-combo' == field.xtype) {
+					}, element);
+				} else if ('modx-combo' == element.xtype) {
 					var data = [];
 
-					var fieldValues = (field.comboValue ? field.comboValue : '').split('||');
+					var values = (element.comboValue ? element.comboValue : '').split('||');
 					
-					for (a = 0; a < fieldValues.length; a++) {
-						var fieldValue = fieldValues[a].split('==');
+					for (a = 0; a < values.length; a++) {
+						var value = values[a].split('==');
 
-                        data.push([fieldValue[fieldValue[1] ? 1 : 0], fieldValue[0]]);
+                        data.push([value[value[1] ? 1 : 0], value[0]]);
 					}
 						
-					field = Ext.applyIf(field, {
+					element = Ext.applyIf({
 				   		store			: new Ext.data.ArrayStore({
 							fields			: ['value','label'],
 							data			: data
 						}),
 						mode 			: 'local',
-						hiddenName		: field.name,
+						hiddenName		: element.name,
 						valueField		: 'value',
 						displayField	: 'label',
 						listeners		: {
@@ -384,26 +433,54 @@
 								Ext.getCmp(data.id + '_replace').setValue(data.lastSelectionText);
 							}
 						}
+					}, element);
+					
+					elements.push({
+						xtype	: 'hidden',
+						name	: element.name + '_replace',
+						id		: element.id + '_replace'
+					});
+				} else if ('modx-field-parent-change' == element.xtype) {
+					elements.push({
+						xtype	: 'hidden',
+						name	: element.name,
+						id		: element.id + '_replace'
 					});
 					
-					output.push({
-						'xtype'	: 'hidden',
-						'name'	: field.name + '_replace',
-						'id'	: field.id + '_replace'
-					});
+					element = Ext.applyIf({
+						name		: element.name + '_replace',
+						formpanel	: 'customtvs-{/literal}{$tv->id}{literal}-create-form-panel',
+						parentcmp	: element.id + '_replace',
+						contextcmp	: null,
+						currentid	: 0,
+					}, element);
+				} else if ('datefield' == element.xtype) {
+					element = Ext.applyIf({
+						format		: MODx.config.manager_date_format,
+						startDay	: parseInt(MODx.config.manager_week_start),
+					}, element);
+				} else if ('timefield' == element.xtype) {	
+					element = Ext.applyIf({
+						format		: MODx.config.manager_time_format,
+						offset_time	: MODx.config.server_offset_time
+					}, element);
+				} else if ('xdatetime' == element.xtype) {	
+					element = Ext.applyIf({
+						dateFormat	: MODx.config.manager_date_format,
+						timeFormat	: MODx.config.manager_time_format,
+						startDay	: parseInt(MODx.config.manager_week_start),
+						offset_time	: MODx.config.server_offset_time
+					}, element);
 				}
-				
-				output.push(Ext.applyIf({
-					description	: MODx.expandHelp ? '' : field.description
-				}, field));
-				output.push({
+
+				elements.push(element, {
 		        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
-		            html		: field.description,
+		            html		: element.description,
 		            cls			: 'desc-under'
 		        });
 			}
-			
-			return output;
+
+			return elements;
 		},
 		submit: function(close) {
 	        close = close === false ? false : true;
@@ -433,7 +510,8 @@
 	    
 	    Ext.applyIf(config, {
 	    	autoHeight	: true,
-	        title 		: _('customtvs.item_create'),
+	    	id			: 'customtvs-{/literal}{$tv->id}{literal}-update-form-panel',
+	        title 		: _('customtvs.item_update'),
 	        defauls		: {
 		        labelAlign	: 'top',
 	            border		: false
@@ -441,58 +519,67 @@
 	        fields		: [{
 	        	'xtype'		: 'hidden',
 	        	'name'		: 'idx'
-	        }].concat(this.getFields())
+	        }].concat(this.getElements())
 	    });
 	    
 	    CustomTVs{/literal}{$tv->id}{literal}.window.UpdateItem.superclass.constructor.call(this, config);
 	};
 	
 	Ext.extend(CustomTVs{/literal}{$tv->id}{literal}.window.UpdateItem, MODx.Window, {
-		getFields: function() {
-			var output = [];
-			var fields = CustomTVs{/literal}{$tv->id}{literal}.config.form_elements;
+		getElements: function() {
+			var elements = [];
+			var _elements = CustomTVs{/literal}{$tv->id}{literal}.config.form_elements;
 			
-			for (i = 0; i < fields.length; i++) {
-				var field = Ext.applyIf(fields[i], {
-					id			: 'customtvs-{/literal}{$tv->id}{literal}-' + fields[i].xtype + '-' + fields[i].name,
+			for (i = 0; i < _elements.length; i++) {
+				var element = Ext.applyIf({}, _elements[i]);
+				
+				element = Ext.applyIf(element, {
+					id			: 'customtvs-{/literal}{$tv->id}{literal}-' + _elements[i].xtype + '-' + _elements[i].name,
 					xtype		: 'textfield',
 					anchor		: '100%',
-					description	: ''
+					description	: MODx.expandHelp ? '' : element.description
 				});
 				
-				if ('checkbox' == field.xtype) {
-					field = Ext.applyIf(field, {
+				if ('checkbox' == element.xtype) {
+					element = Ext.applyIf({
 						inputValue	: 1
+					}, element);
+				} else if ('modx-combo-browser' == element.xtype) {
+					elements.push({
+						name		: element.name,
+						xtype		: 'hidden',
+						id			: element.id + '_replace',
 					});
-				} else if ('modx-combo-browser' == field.xtype) {
-					field = Ext.applyIf(field, {
+					
+					element = Ext.applyIf({
+						name		: element.name + '_replace',
 						source		: MODx.config.default_media_source,
 						listeners	: {
 							'select'	: {
 								fn			: function(data) {
-									this.setValue(data.fullRelativeUrl);
+									Ext.getCmp(this.config.id + '_replace').setValue(data.fullRelativeUrl);
 								}
 							}
 						}
-					});
-				} else if ('modx-combo' == field.xtype) {
+					}, element);
+				} else if ('modx-combo' == element.xtype) {
 					var data = [];
 
-					var fieldValues = (field.comboValue ? field.comboValue : '').split('||');
+					var values = (element.comboValue ? element.comboValue : '').split('||');
 					
-					for (a = 0; a < fieldValues.length; a++) {
-						var fieldValue = fieldValues[a].split('==');
+					for (a = 0; a < values.length; a++) {
+						var value = values[a].split('==');
 
-                        data.push([fieldValue[fieldValue[1] ? 1 : 0], fieldValue[0]]);
+                        data.push([value[value[1] ? 1 : 0], value[0]]);
 					}
 						
-					field = Ext.applyIf(field, {
+					element = Ext.applyIf({
 				   		store			: new Ext.data.ArrayStore({
 							fields			: ['value','label'],
 							data			: data
 						}),
 						mode 			: 'local',
-						hiddenName		: field.name,
+						hiddenName		: element.name,
 						valueField		: 'value',
 						displayField	: 'label',
 						listeners		: {
@@ -500,26 +587,54 @@
 								Ext.getCmp(data.id + '_replace').setValue(data.lastSelectionText);
 							}
 						}
+					}, element);
+					
+					elements.push({
+						xtype	: 'hidden',
+						name	: element.name + '_replace',
+						id		: element.id + '_replace'
+					});
+				} else if ('modx-field-parent-change' == element.xtype) {
+					elements.push({
+						xtype	: 'hidden',
+						name	: element.name,
+						id		: element.id + '_replace'
 					});
 					
-					output.push({
-						'xtype'	: 'hidden',
-						'name'	: field.name + '_replace',
-						'id'	: field.id + '_replace'
-					});
+					element = Ext.applyIf({
+						name		: element.name + '_replace',
+						formpanel	: 'customtvs-{/literal}{$tv->id}{literal}-update-form-panel',
+						parentcmp	: element.id + '_replace',
+						contextcmp	: null,
+						currentid	: 0,
+					}, element);
+				} else if ('datefield' == element.xtype) {
+					element = Ext.applyIf({
+						format		: MODx.config.manager_date_format,
+						startDay	: parseInt(MODx.config.manager_week_start),
+					}, element);
+				} else if ('timefield' == element.xtype) {	
+					element = Ext.applyIf({
+						format		: MODx.config.manager_time_format,
+						offset_time	: MODx.config.server_offset_time
+					}, element);
+				} else if ('xdatetime' == element.xtype) {	
+					element = Ext.applyIf({
+						dateFormat	: MODx.config.manager_date_format,
+						timeFormat	: MODx.config.manager_time_format,
+						startDay	: parseInt(MODx.config.manager_week_start),
+						offset_time	: MODx.config.server_offset_time
+					}, element);
 				}
-				
-				output.push(Ext.applyIf({
-					description	: MODx.expandHelp ? '' : field.description
-				}, field));
-				output.push({
+
+				elements.push(element, {
 		        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
-		            html		: field.description,
+		            html		: element.description,
 		            cls			: 'desc-under'
 		        });
 			}
 			
-			return output;
+			return elements;
 		},
 		submit: function(close) {
 	        close = close === false ? false : true;

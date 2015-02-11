@@ -33,7 +33,8 @@
 
 	$modx->controller->setPlaceholder('config', $modx->toJSON(array_merge($customTVs->config, array(
 		'grid_elements'	=> $modx->fromJSON($modx->getOption('grid_elements', $params, '[]')),
-		'form_elements'	=> $modx->fromJSON($modx->getOption('form_elements', $params, '[]'))
+		'form_elements'	=> $modx->fromJSON($modx->getOption('form_elements', $params, '[]')),
+		'grid_sortable'	=> $modx->getOption('grid_sortable', $params, false)
 	))));
 	
 	return $modx->smarty->fetch($customTVs->config['templatesPath'].'customtvsgrid.tpl');

@@ -38,6 +38,8 @@
 	$_lang['customtvs.label_form_elements_desc']			= 'The form elements, this must be compatible with the ExtJS format (JSON).';
 	$_lang['customtvs.label_grid_elements']					= 'Grid elements';
 	$_lang['customtvs.label_grid_elements_desc']			= 'The grid elements, this must be compatible with the ExtJS format (JSON)..';
+	$_lang['customtvs.label_sortable']						= 'Grid sortable';
+	$_lang['customtvs.label_sortable_desc']					= 'The grid sortable, may the grid be sorted by using drag and drop.';
 	
 	$_lang['customtvs.default_element_1']					= 'Carousel';
 	$_lang['customtvs.default_element_2']					= 'Carousel with text';
