@@ -3,7 +3,7 @@
 	/**
 	 * Custom TVs
 	 *
-	 * Copyright 2014 by Oene Tjeerd de Bruin <info@oetzie.nl>
+	 * Copyright 2016 by Oene Tjeerd de Bruin <info@oetzie.nl>
 	 *
 	 * This file is part of Custom TVs, a real estate property listings component
 	 * for MODX Revolution.
@@ -22,25 +22,47 @@
 	 * Suite 330, Boston, MA 02111-1307 USA
 	 */
 
-	require_once $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'/model/customtvs/customtvs.class.php';
+	if (false !== ($tv = $modx->getOption('tv', $scriptProperties, false))) {
+		$limit 		= $modx->getOption('limit', $scriptProperties, null);
+		$resourceID = $modx->getOption('parent', $scriptProperties, $modx->resource->id);
 
-	$customtvs = new CustomTVs($modx);
+		if (null !== ($resource = $modx->getObject('modResource', $resourceID))) {
+			$templateVar = $resource->getTVValue(is_numeric($tv) ? (int) $tv : $tv);
+			$templateVar = $modx->fromJSON('' == $templateVar ? '[]' : $templateVar);
+			$order		 = $modx->getOption('order', $scriptProperties, 'idx');
 
-	if (false !== ($tvID = $modx->getOption('tv', $scriptProperties, false))) {
-		$limit = $modx->getOption('limit', $scriptProperties, null);
+			switch (strtoupper($order)) {
+				case 'RAND':
+					shuffle($templateVar);
 
-		if (null !== ($resource = $modx->getObject('modResource', $modx->getOption('parent', $scriptProperties, $modx->resource->id)))) {
-			$templateVar = $resource->getTVValue(is_numeric($tvID) ? (int) $tvID : $tvID);
-			$templateVarValues = $modx->fromJSON('' != $templateVar ? $templateVar : '[]');
+					break;
+				default:
+					$templateVarSort = array();
 
-			if ('RAND' == $modx->getOption('order', $scriptProperties, null)) {
-				shuffle($templateVarValues);
+					foreach($templateVar as $value) {
+						if (isset($value[$order])) {
+							$templateVarSort[$value[$order]] = $value;
+						} else {
+							$templateVarSort[$value['idx']] = $value;
+						}
+					}
+
+					ksort($templateVarSort);
+
+					if ('DESC' == strtoupper($modx->getOption('orderDir', $scriptProperties, 'ASC'))) {
+						$templateVarSort = array_reverse($templateVarSort);
+					}
+
+					$templateVar = $templateVarSort;
+
+					break;
 			}
 
-			$output = array();
+			$output 	= array();
+			$tpl 		= $modx->getOption('tpl', $scriptProperties, null);
 
-			foreach ($templateVarValues as $key => $value) {
-				$output[] = $customtvs->getTpl($modx->getOption('tpl', $scriptProperties, null), $value);
+			foreach ($templateVar as $key => $value) {
+				$output[] = $modx->getChunk($tpl, $value);
 
 				if (null !== $limit && $limit <= count($output)) {
 					break;
@@ -48,13 +70,23 @@
 			}
 
 			if (0 < count($output)) {
-				if (false == ($wrapper = $modx->getOption('tplWrapper', $scriptProperties, false))) {
-					return implode(PHP_EOL, $output);
+				if (false === ($wrapper = $modx->getOption('tplWrapper', $scriptProperties, false))) {
+					$output = implode(PHP_EOL, $output);
 				} else {
-					return $customtvs->getTpl($wrapper, array('output' => implode(PHP_EOL, $output)));
+					$output = $modx->getChunk($wrapper, array(
+						'output' => implode(PHP_EOL, $output)
+					));
+				}
+
+				if (false !== ($toPlaceholder = $modx->getOption('toPlaceholder', $scriptProperties, false))) {
+					$modx->setPlaceholder($toPlaceholder, $output);
+				} else {
+					return $output;
 				}
 			}
 		}
 	}
+
+	return;
 	
 ?>

@@ -3,7 +3,7 @@
 	/**
 	 * Custom TVs
 	 *
-	 * Copyright 2013 by Oene Tjeerd de Bruin <info@oetzie.nl>
+	 * Copyright 2016 by Oene Tjeerd de Bruin <info@oetzie.nl>
 	 *
 	 * This file is part of Custom TVs, a real estate property listings component
 	 * for MODX Revolution.
@@ -48,20 +48,25 @@
 			$assetsPath 	= $this->modx->getOption('customtvs.assets_path', $config, $this->modx->getOption('assets_path').'components/customtvs/');
 		
 			$this->config = array_merge(array(
-				'basePath'				=> $corePath,
-				'corePath' 				=> $corePath,
-				'modelPath' 			=> $corePath.'model/',
-				'processorsPath' 		=> $corePath.'processors/',
-				'elementsPath' 			=> $corePath.'elements/',
-				'chunksPath' 			=> $corePath.'elements/chunks/',
-				'pluginsPath' 			=> $corePath.'elements/plugins/',
-				'snippetsPath' 			=> $corePath.'elements/snippets/',
-				'tvsPath' 				=> $corePath.'elements/tvs/',
-				'templatesPath' 		=> $corePath.'templates/',
-				'helpurl'				=> 'customtvs'
+				'namespace'				=> $this->modx->getOption('namespace', $config, 'customtvs'),
+				'helpurl'				=> $this->modx->getOption('namespace', $config, 'customtvs'),
+				'language'				=> 'customtvs:default',
+				'base_path'				=> $corePath,
+				'core_path' 			=> $corePath,
+				'model_path' 			=> $corePath.'model/',
+				'processors_path' 		=> $corePath.'processors/',
+				'elements_path' 		=> $corePath.'elements/',
+				'plugins_path' 			=> $corePath.'elements/plugins/',
+				'snippets_path' 		=> $corePath.'elements/snippets/',
+				'tvs_path' 				=> $corePath.'elements/tvs/',
+				'templates_path' 		=> $corePath.'templates/',
+				'assets_path' 			=> $assetsPath,
+				'js_url' 				=> $assetsUrl.'js/',
+				'css_url' 				=> $assetsUrl.'css/',
+				'assets_url' 			=> $assetsUrl
 			), $config);
 		
-			$this->modx->addPackage('customtvs', $this->config['modelPath']);
+			$this->modx->addPackage('customtvs', $this->config['model_path']);
 		}
 		
 		/**
@@ -71,37 +76,6 @@
 		public function getHelpUrl() {
 			return $this->config['helpurl'];
 		}
-		
-		/**
-		 * @acces public.
-		 * @param String $tpl.
-		 * @param Array $properties.
-		 * @param String $type.
-		 * @return String.
-		 */
-		public function getTpl($tpl, $properties = array(), $type = 'chunk') {
-		  	if (0 === strpos($tpl, '@')) {
-			  	$type 	= substr($tpl, 1, strpos($tpl, ':') - 1);
-			  	$tpl	= substr($tpl, strpos($tpl, ':') + 1, strlen($tpl));
-		  	}
-  
-		  	switch (strtolower($type)) {
-			  	case 'inline':
-				  	$chunk = $this->modx->newObject('modChunk', array('name' => sprintf('customtvs-%s', uniqid())));
-  
-				  	$chunk->setCacheable(false);
-  
-				  	$output = $chunk->process($properties, $tpl);
-  
-				  	break;
-			  	case 'chunk':
-				  	$output = $this->modx->getChunk($tpl, $properties);
-  
-				  	break;
-		  	}
-  
-		  	return $output;
-	  	}
 	}
 	
 ?>

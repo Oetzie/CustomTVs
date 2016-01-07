@@ -3,7 +3,7 @@
 	/**
 	 * Custom TVs
 	 *
-	 * Copyright 2013 by Oene Tjeerd de Bruin <info@oetzie.nl>
+	 * Copyright 2016 by Oene Tjeerd de Bruin <info@oetzie.nl>
 	 *
 	 * This file is part of Custom TVs, a real estate property listings component
 	 * for MODX Revolution.
@@ -21,16 +21,14 @@
 	 * Custom TVs; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 	 * Suite 330, Boston, MA 02111-1307 USA
 	 */
-	 
-	require_once $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'/model/customtvs/customtvs.class.php';
+	
+	$customTVs = $modx->getService('customtvs', 'CustomTVs', $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'model/customtvs/');
 
-	$customTVs = new CustomTVs($modx);
-
-	$modx->lexicon->load('customtvs:default');
-	$modx->controller->addLexiconTopic('customtvs:default');
+	$modx->lexicon->load($modx->getOption('language', $customTVs->config));
+	$modx->controller->addLexiconTopic($modx->getOption('language', $customTVs->config));
 	
 	$modx->smarty->assign('customtvs', $modx->lexicon->fetch('customtvs.', true));
 	
-	return $modx->smarty->fetch($customTVs->config['templatesPath'].'customtvsgridinputoptions.tpl');
+	return $modx->smarty->fetch($modx->getOption('templates_path', $customTVs->config).'customtvsgridinputoptions.tpl');
 	
 ?>

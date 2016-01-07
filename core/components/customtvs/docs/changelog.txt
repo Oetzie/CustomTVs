@@ -3,15 +3,29 @@ CustomTVs
 ----------------------
 
 ----------------------
+Version: 1.1.0
+Released: 2016-01-07
+----------------------
+- Google Maps template variable removed
+- Grid template variable configurator
+- Bug and code fixes
+
+----------------------
+Version: 1.0.2
+Released: 2015-04-14
+----------------------
+- Google Maps template variable
+
+----------------------
 Version: 1.0.1
 Released: 2015-02-11
 ----------------------
 - Bugfixes
-- Grid sortorder added
-- New form/grid types added
+- Grid template variable
+	- Sort order added
 	- 'Select from resource from tree' type
 	- Media browser type
-	- Date / time type
+	- Date/time type
 
 ----------------------
 Version: 1.0.0

@@ -3,7 +3,7 @@
 	/**
 	 * Custom TVs
 	 *
-	 * Copyright 2014 by Oene Tjeerd de Bruin <info@oetzie.nl>
+	 * Copyright 2016 by Oene Tjeerd de Bruin <info@oetzie.nl>
 	 *
 	 * This file is part of Custom TVs, a real estate property listings component
 	 * for MODX Revolution.
@@ -22,18 +22,19 @@
 	 * Suite 330, Boston, MA 02111-1307 USA
 	 */
 
-	$corePath = $modx->getOption('core_path', null, MODX_CORE_PATH).'components/customtvs/';
-
 	switch ($modx->event->name) {
-   		case 'OnTVInputRenderList':
-        	$modx->event->output($corePath.'elements/tvs/input/');
+		case 'OnTVInputRenderList':
+			$modx->lexicon->load('customtvs:default');
+   		
+        	$modx->event->output($modx->getOption('core_path', null, MODX_CORE_PATH).'components/customtvs/elements/tvs/input/');
 
-       		break;
-    	case 'OnTVInputPropertiesList':
-        	$modx->event->output($corePath.'elements/tvs/inputoptions/');
+			break;
+    	case 'OnTVInputPropertiesList':	
+        	$modx->event->output($modx->getOption('core_path', null, MODX_CORE_PATH).'components/customtvs/elements/tvs/inputoptions/');
 
         	break;
     	case 'OnManagerPageBefoOnTVInputRenderListreRender':
+    	
         	break;
 	}
 	
