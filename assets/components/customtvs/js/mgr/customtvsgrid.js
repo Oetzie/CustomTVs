@@ -75,7 +75,7 @@ CustomTVs.grid.GridTV = function(config) {
 	        	scope		: this
 	        },
 	        'afterrender' : {
-	           fn			: this.ddData,
+	           fn			: this.moveItem,
 	           scope		: this
 	    	}
 		}
@@ -244,8 +244,8 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 			}
 				
 			if (-1 != ['combo', 'browser', 'resource'].indexOf(column.xtype)) {
-				if (-1 == columns.indexOf(column.name + '_replace')) {
-					columns.push({name : column.name + '_replace', type: 'string'});
+				if (-1 == columns.indexOf(column.name + '-replace')) {
+					columns.push({name : column.name + '-replace', type: 'string'});
 				}
 			}
 		}
@@ -267,13 +267,13 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 			scope	: this
 		}, '-', {
 			text	:  _('customtvs.grid_item_move_top'),
-			index	: 'first',
-			handler	: this.setItemTo,
+			index	: 'top',
+			handler	: this.moveItemTo,
 			scope	: this
 		}, {
 			text	: _('customtvs.grid_item_move_bottom'),
-			index	: 'last',
-			handler	: this.setItemTo,
+			index	: 'bottom',
+			handler	: this.moveItemTo,
 			scope	: this
 		}];
 	},
@@ -293,10 +293,6 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 				'success'		: {
 			    	fn				: this.encodeData,
 					scope			: this
-			    },
-			    'afterrender'	: {
-				    fn 				: this.loadElements,
-				    scope			: this
 			    }
 		    }
 	    });
@@ -361,11 +357,7 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 				'success'		: {
 					fn				: this.encodeData,
 					scope			: this
-				},
-				'afterrender'	: {
-				    fn 				: this.loadElements,
-				    scope			: this
-			    }
+				}
 			}
 		});
 		
@@ -402,47 +394,43 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
     	this.getStore().removeAt(this.menu.recordIndex);
     	this.encodeData();
     },
-    setItemTo: function(btn, e) {
+    moveItem: function() {
+	    var grid = this;
+	    
+		var ddrow = new Ext.dd.DropTarget(this.getView().mainBody, {
+        	ddGroup 	: grid.config.ddGroup,
+            notifyDrop 	: function(dd, e, data) {
+            	var sm = grid.getSelectionModel();
+                var sels = sm.getSelections();
+                var cindex = dd.getDragData(e).rowIndex;
+                
+                if (sm.hasSelection()) {
+                	for (i = 0; i < sels.length; i++) {
+                    	grid.getStore().remove(grid.getStore().getById(sels[i].id));
+                        grid.getStore().insert(cindex, sels[i]);
+                    }
+                    
+                    sm.selectRecords(sels);
+                    
+                    grid.encodeData();
+                }
+            }
+        });
+	},
+    moveItemTo: function(btn, e) {
 	    var record = this.getStore().getAt(this.menu.recordIndex);
 	    
-	    if ('first' == btn.options.index) {
+	    if ('top' == btn.options.index) {
 		    this.getStore().remove(record);
 		    
 		    this.getStore().insert(0, record);
-	    } else if ('last' == btn.options.index) {
+	    } else if ('bottom' == btn.options.index) {
 		    this.getStore().remove(record);
 		    
 		    this.getStore().add(record);
 	    }
 
     	this.encodeData();
-    },
-    loadElements: function(event) {			
-	    for (var i = 0; i < event.fields.length; i++) {
-		    if (event.fields[i].richtext) {
-			    if (MODx.loadRTE) {
-					MODx.loadRTE(event.fields[i].id, {
-						toolbar1 				: event.fields[i].extra.toolbar1 || 'undo redo | bold italic underline strikethrough | styleselect bullist numlist outdent indent',
-						toolbar2 				: event.fields[i].extra.toolbar2 || '',
-						toolbar3 				: event.fields[i].extra.toolbar3 || '',
-						plugins 				: event.fields[i].extra.plugins || '',
-						menubar 				: false,
-						statusbar				: false,
-						height					: '150px',
-						toggle					: false
-					});
-				}
-		    }
-	    }
-    },
-    unloadElements: function(event) {
-	    for (var i = 0; i < event.fields.length; i++) {
-		    if (event.fields[i].richtext) {
-			    if (MODx.unloadRTE) {
-					MODx.unloadRTE(event.fields[i].id);
-				}
-		    }
-	    }
     },
     renderImage: function(d, c, e) {
     	var regExp = /^(http|https|www)/;
@@ -503,7 +491,7 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 		var key = Object.keys(e.data).filter(function(key) {return e.data[key] === d})[0];
 		
 		if (undefined != key) {
-			return '<a href="?a=resource/update&id=' + d + '" target="_blank">' + e.data[key + '_replace'] + '</a>';
+			return '<a href="?a=resource/update&id=' + d + '" target="_blank">' + e.data[key + '-replace'] + '</a>';
 		}
 
     	return d;
@@ -519,31 +507,7 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 
         this.getStore().loadData(data);
         this.getView().refresh();
-    },
-    ddData: function() {
-	    var grid = this;
-	    
-		var ddrow = new Ext.dd.DropTarget(this.getView().mainBody, {
-        	ddGroup 	: 'customtvs-' + this.tvid + '-grid-tv',
-            notifyDrop 	: function(dd, e, data) {
-            	var sm = grid.getSelectionModel();
-                var sels = sm.getSelections();
-                var cindex = dd.getDragData(e).rowIndex;
-                
-                if (sm.hasSelection()) {
-                	for (i = 0; i < sels.length; i++) {
-	                	console.log(sels[i]);
-                    	grid.getStore().remove(grid.getStore().getById(sels[i].id));
-                        grid.getStore().insert(cindex, sels[i]);
-                    }
-                    
-                    sm.selectRecords(sels);
-                    
-                    grid.encodeData();
-                }
-            }
-        });
-	}
+    }
 });
 	
 Ext.reg('customtvs-grid-tv', CustomTVs.grid.GridTV);
@@ -559,18 +523,18 @@ CustomTVs.window.GridTVCreateItem = function(config) {
 		    labelAlign	: 'top',
 	        border		: false
 	    },
-	    fields		: this.getElements(config.formElements, config.tvid)
+	    fields		: this.getElements(config.formElements, config)
 	});
 	    
 	CustomTVs.window.GridTVCreateItem.superclass.constructor.call(this, config);
 };
 	
 Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
-	getElements: function(formElements, tvid) {
+	getElements: function(formElements, config) {
 		var elements = [];
 
 		for (i = 0; i < formElements.length; i++) {
-			formElements[i].id = 'customtvs-' + tvid + '-create-' + formElements[i].xtype + '-' + formElements[i].name + '-' + Ext.id();
+			formElements[i].id = 'customtvs-' + config.tvid + '-create-' + formElements[i].xtype + '-' + formElements[i].name + '-' + Ext.id();
 			
 			var element = Ext.applyIf(formElements[i], {
 				xtype		: 'textfield',
@@ -621,7 +585,25 @@ Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
 				case 'richtext':
 					element = Ext.applyIf({
 						xtype			: 'textarea',
-						richtext		: true
+						listeners		: {
+							'afterrender' : {
+								fn 			: function() {
+									if (MODx.loadRTE) {
+										MODx.loadRTE(this.id, {
+											toolbar1 				: this.extra.toolbar1 || 'undo redo | bold italic underline strikethrough | styleselect bullist numlist outdent indent',
+											toolbar2 				: this.extra.toolbar2 || '',
+											toolbar3 				: this.extra.toolbar3 || '',
+											plugins 				: this.extra.plugins || '',
+											menubar 				: false,
+											statusbar				: false,
+											height					: '150px',
+											toggle					: false
+										});
+									}
+								},
+								scope 		: element
+							}
+						}
 					}, element);	
 					
 					break;
@@ -634,8 +616,8 @@ Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
 				case 'combo':
 					elements.push({
 						xtype	: 'hidden',
-						name	: element.name + '_replace',
-						id		: element.id + '_replace'
+						name	: element.name + '-replace',
+						id		: element.id + '-replace'
 					});
 					
 					element = Ext.applyIf({
@@ -650,7 +632,7 @@ Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
 						displayField	: 'label',
 						listeners		: {
 							'select'	: function(data) {
-								Ext.getCmp(this.config.id + '_replace').setValue(data.lastSelectionText);
+								Ext.getCmp(this.config.id + '-replace').setValue(data.lastSelectionText);
 							}
 						}
 					}, element);
@@ -658,6 +640,8 @@ Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
 					break;
 				case 'checkbox':
 					element = Ext.applyIf({
+						fieldLabel 	: '',
+						boxLabel	: element.fieldLabel,
 						inputValue	: 1
 					}, element);
 				
@@ -667,17 +651,19 @@ Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
 	
 					for (var ii = 0; ii < element.extra.values.length; ii++) {
 						items.push({
-							name 		: element.name + '[]',
+							name 		: element.name,
 							boxLabel	: element.extra.values[ii].label,
 							inputValue	: element.extra.values[ii].value
 						});
 					}
 					
-					element = Ext.applyIf({
-						xtype			: 'checkboxgroup',
-					   	columns			: 1,
-					   	items			: items
-					}, element);
+					if (0 < items.length) {
+						element = Ext.applyIf({
+							xtype			: 'checkboxgroup',
+						   	columns			: 1,
+						   	items			: items
+						}, element);
+					}
 				
 					break;
 				case 'radiogroup':
@@ -691,49 +677,52 @@ Ext.extend(CustomTVs.window.GridTVCreateItem, MODx.Window, {
 						});
 					}
 					
-					element = Ext.applyIf({
-						xtype			: 'radiogroup',
-					   	columns			: 1,
-					   	items			: items
-					}, element);
+					if (0 < items.length) {
+						element = Ext.applyIf({
+							xtype			: 'radiogroup',
+						   	columns			: 1,
+						   	items			: items
+						}, element);
+					}
 					
-					break;
-				case 'browser':
-					elements.push({
-						xtype	: 'hidden',
-						name	: element.name,
-						id		: element.id + '_replace'
-					});
-						
-					element = Ext.applyIf({
-						xtype		: 'modx-combo-browser',
-						name		: element.name + '_replace',
-						source		: element.extra.source || MODx.config.default_media_source,
-						openTo		: element.extra.openTo || '/',
-						listeners	: {
-							'select'	: {
-								fn			: function(data) {
-									Ext.getCmp(this.config.id + '_replace').setValue(data.fullRelativeUrl);
-								}
-							}
-						}
-					}, element);
-				
 					break;
 				case 'resource':
 					elements.push({
 						xtype	: 'hidden',
 						name	: element.name,
-						id		: element.id + '_replace'
+						id		: element.id + '-replace'
 					});
 						
 					element = Ext.applyIf({
 						xtype		: 'modx-field-parent-change',
-						name		: element.name + '_replace',
-						formpanel	: 'customtvs-' + tvid + '-create-form-panel',
-						parentcmp	: element.id + '_replace',
+						name		: element.name + '-replace',
+						formpanel	: 'customtvs-' + config.tvid + '-create-form-panel',
+						parentcmp	: element.id + '-replace',
 						contextcmp	: null,
 						currentid	: 0,
+					}, element);
+				
+					break;
+				case 'browser':
+					elements.push({
+						xtype	: 'hidden',
+						name	: element.name,
+						id		: element.id + '-replace'
+					});
+						
+					element = Ext.applyIf({
+						xtype		: 'modx-combo-browser',
+						name		: element.name + '-replace',
+						source		: element.extra.source || MODx.config.default_media_source,
+						openTo		: element.extra.openTo || '/',
+						allowedFileTypes : element.extra.allowedFileTypes || '',
+						listeners	: {
+							'select'	: {
+								fn			: function(data) {
+									Ext.getCmp(this.config.id + '-replace').setValue(data.fullRelativeUrl);
+								}
+							}
+						}
 					}, element);
 				
 					break;
@@ -773,7 +762,7 @@ Ext.reg('customtvs-window-item-create', CustomTVs.window.GridTVCreateItem);
 	
 CustomTVs.window.GridTVUpdateItem = function(config) {
 	config = config || {};
-	    
+	
 	Ext.applyIf(config, {
 		autoHeight	: true,
 		id			: 'customtvs-' + config.tvId + '-update-form-panel',
@@ -785,18 +774,18 @@ CustomTVs.window.GridTVUpdateItem = function(config) {
 	    fields		: [{
 	    	'xtype'		: 'hidden',
 			'name'		: 'idx'
-	    }].concat(this.getElements(config.formElements, config.tvid))
+	    }].concat(this.getElements(config.formElements, config))
 	});
 	    
 	CustomTVs.window.GridTVUpdateItem.superclass.constructor.call(this, config);
 };
 	
 Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
-	getElements: function(formElements, tvid) {
+	getElements: function(formElements, config) {
 		var elements = [];
 		
 		for (i = 0; i < formElements.length; i++) {
-			formElements[i].id = 'customtvs-' + tvid + '-update-' + formElements[i].xtype + '-' + formElements[i].name + '-' + Ext.id();
+			formElements[i].id = 'customtvs-' + config.tvid + '-update-' + formElements[i].xtype + '-' + formElements[i].name + '-' + Ext.id();
 			
 			var element = Ext.applyIf(formElements[i], {
 				xtype		: 'textfield',
@@ -847,7 +836,25 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 				case 'richtext':
 					element = Ext.applyIf({
 						xtype			: 'textarea',
-						richtext		: true
+						listeners		: {
+							'afterrender' : {
+								fn 			: function() {
+									if (MODx.loadRTE) {
+										MODx.loadRTE(this.id, {
+											toolbar1 				: this.extra.toolbar1 || 'undo redo | bold italic underline strikethrough | styleselect bullist numlist outdent indent',
+											toolbar2 				: this.extra.toolbar2 || '',
+											toolbar3 				: this.extra.toolbar3 || '',
+											plugins 				: this.extra.plugins || '',
+											menubar 				: false,
+											statusbar				: false,
+											height					: '150px',
+											toggle					: false
+										});
+									}
+								},
+								scope 		: element
+							}
+						}
 					}, element);
 					
 					break;
@@ -860,8 +867,8 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 				case 'combo':
 					elements.push({
 						xtype	: 'hidden',
-						name	: element.name + '_replace',
-						id		: element.id + '_replace'
+						name	: element.name + '-replace',
+						id		: element.id + '-replace'
 					});
 					
 					element = Ext.applyIf({
@@ -876,7 +883,7 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 						displayField	: 'label',
 						listeners		: {
 							'select'	: function(data) {
-								Ext.getCmp(this.config.id + '_replace').setValue(data.lastSelectionText);
+								Ext.getCmp(this.config.id + '-replace').setValue(data.lastSelectionText);
 							}
 						}
 					}, element);
@@ -884,6 +891,8 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 					break;
 				case 'checkbox':
 					element = Ext.applyIf({
+						fieldLabel 	: '',
+						boxLabel	: element.description,
 						inputValue	: 1
 					}, element);
 					
@@ -893,7 +902,7 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 	
 					for (var ii = 0; ii < element.extra.values.length; ii++) {
 						items.push({
-							name 		: element.name + '[]',
+							name 		: element.name,
 							boxLabel	: element.extra.values[ii].label,
 							inputValue	: element.extra.values[ii].value
 						});
@@ -924,47 +933,48 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 					}, element);
 					
 					break;
+				case 'resource':
+					elements.push({
+						xtype	: 'hidden',
+						name	: element.name,
+						id		: element.id + '-replace'
+					});
+
+					element = Ext.applyIf({
+						xtype		: 'modx-field-parent-change',
+						name		: element.name + '-replace',
+						formpanel	: 'customtvs-' + config.tvid + '-update-form-panel',
+						parentcmp	: element.id + '-replace',
+						contextcmp	: null,
+						currentid	: 0,
+					}, element);
+					
+					break;
 				case 'browser':
 					elements.push({
 						xtype	: 'hidden',
 						name	: element.name,
-						id		: element.id + '_replace'
+						id		: element.id + '-replace'
 					});
 						
 					element = Ext.applyIf({
 						xtype		: 'modx-combo-browser',
-						name		: element.name + '_replace',
+						name		: element.name + '-replace',
 						source		: element.extra.source || MODx.config.default_media_source,
 						openTo		: element.extra.openTo || '/',
+						allowedFileTypes : element.extra.allowedFileTypes || '',
 						listeners	: {
 							'select'	: {
 								fn			: function(data) {
-									Ext.getCmp(this.config.id + '_replace').setValue(data.fullRelativeUrl);
+									Ext.getCmp(this.config.id + '-replace').setValue(data.fullRelativeUrl);
 								}
 							}
 						}
 					}, element);
 					
 					break;
-				case 'resource':
-					elements.push({
-						xtype	: 'hidden',
-						name	: element.name,
-						id		: element.id + '_replace'
-					});
-						
-					element = Ext.applyIf({
-						xtype		: 'modx-field-parent-change',
-						name		: element.name + '_replace',
-						formpanel	: 'customtvs-' + tvid + '-update-form-panel',
-						parentcmp	: element.id + '_replace',
-						contextcmp	: null,
-						currentid	: 0,
-					}, element);
-					
-					break;
 			}
-			
+
 			elements.push(element, {
 				xtype		: MODx.expandHelp ? 'label' : 'hidden',
 				html		: element.description,
@@ -978,7 +988,7 @@ Ext.extend(CustomTVs.window.GridTVUpdateItem, MODx.Window, {
 	    close = close === false ? false : true;
 	        
 	    var f = this.fp.getForm();
-	        
+  
 	    if (f.isValid() && this.fireEvent('beforeSubmit', f.getValues())) {
 	       	this.config.scope.getStore().getAt(f.getValues().idx).data = f.getValues();
 	        

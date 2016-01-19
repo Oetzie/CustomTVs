@@ -62,6 +62,16 @@
 			$tpl 		= $modx->getOption('tpl', $scriptProperties, null);
 
 			foreach ($templateVar as $key => $value) {
+				foreach ($value as $subKey => $subValue) {
+					if (preg_match('/-replace$/si', $subKey)) {
+						unset($value[$subKey]);
+					} else {
+						if (is_array($subValue)) {
+							$value[$subKey] = implode(',', $subValue);
+						}
+					}
+				}
+
 				$output[] = $modx->getChunk($tpl, $value);
 
 				if (null !== $limit && $limit <= count($output)) {

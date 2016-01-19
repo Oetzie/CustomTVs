@@ -75,6 +75,8 @@
 	$_lang['customtvs.grid_form_element_label_source_desc']			= 'The media source for the media browser.';
 	$_lang['customtvs.grid_form_element_label_opento']				= 'Media source default map';
 	$_lang['customtvs.grid_form_element_label_opento_desc']			= 'The default map for the media browser.';
+	$_lang['customtvs.grid_form_element_label_filetypes']			= 'Allowed media browser extensions';
+	$_lang['customtvs.grid_form_element_label_filetypes_desc'] 		= 'The allowed extensions, to separate extensions use a comma.';
 	$_lang['customtvs.grid_form_element_label_toolbar1']			= 'Toolbar 1';
 	$_lang['customtvs.grid_form_element_label_toolbar1_desc']		= 'The buttons for the first toolbar in the WYSIWYG editor.';
 	$_lang['customtvs.grid_form_element_label_toolbar2']			= 'Toolbar 2';
@@ -122,7 +124,7 @@
 	$_lang['customtvs.textfield']									= 'Textfield';
 	$_lang['customtvs.datefield']									= 'Textfield (date)';
 	$_lang['customtvs.timefield']									= 'Textfield (time)';
-	$_lang['customtvs.datetimefield']								= 'Textfield (date with time )';
+	$_lang['customtvs.datetimefield']								= 'Textfield (date with time)';
 	$_lang['customtvs.passwordfield']								= 'Textfield (password)';
 	$_lang['customtvs.numberfield']									= 'Textfield (number)';
 	$_lang['customtvs.textarea']									= 'Textarea';

@@ -386,14 +386,14 @@
 		    	title		: '{/literal}{$customtvs.grid_extra_settings}{literal}',
 				collapsible : true,
 				collapsed 	: true,
-				id			: 'customtvs-extra-settings',
+				id			: 'customtvs-extra-settings-create',
 				defaults	: {
 	                layout		: 'form',
 	                labelSeparator : ''
 	            },
 				items		: [{
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-default',
+				    id 			: 'customtvs-extra-default-create',
 				    style 		: 'padding-top: 2px',
 				    hidden 		: false,
 				    defaults	: {
@@ -401,13 +401,13 @@
 		                labelSeparator : ''
 		            },
 				    items		: [{
-			        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
+			        	xtype		: 'label',
 			            html		: '{/literal}{$customtvs.grid_no_extra_settings}{literal}',
 			            cls			: 'desc-under'
 			        }]
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-datefield',
+				    id 			: 'customtvs-extra-datefield-create',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -456,7 +456,7 @@
 					}]
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-timefield',
+				    id 			: 'customtvs-extra-timefield-create',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -503,7 +503,7 @@
 					}]
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-richtext',
+				    id 			: 'customtvs-extra-richtext-create',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -571,8 +571,8 @@
 					    }]
 					}]
 				}, {
-				    xtype		: 'customtvs-extra-combo',
-				    id 			: 'customtvs-extra-combos',
+				    xtype		: 'customtvs-combo-values',
+				    id 			: 'customtvs-extra-combos-create',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -581,7 +581,7 @@
 		            }
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-browser',
+				    id 			: 'customtvs-extra-browser-create',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -607,6 +607,17 @@
 					        }, {
 					        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
 					            html		: '{/literal}{$customtvs.grid_form_element_label_source_desc}{literal}',
+					            cls			: 'desc-under'
+					        }, {
+					        	xtype		: 'textfield',
+					        	fieldLabel	: '{/literal}{$customtvs.grid_form_element_label_filetypes}{literal}',
+					        	description	: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_form_element_label_filetypes_desc}{literal}',
+					        	name		: 'allowedFileTypes',
+					        	anchor		: '100%',
+					        	value		: ''
+					        }, {
+					        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
+					            html		: '{/literal}{$customtvs.grid_form_element_label_filetypes_desc}{literal}',
 					            cls			: 'desc-under'
 					        }]
 					    }, {
@@ -635,6 +646,8 @@
 	
 	Ext.extend(CustomTVs.window.CreateFormElement, MODx.Window, {
 		xtype: function(event) {
+			var type = 'create';
+			
 			var elements = {
 				default 		: true,
 				datefield 		: false,
@@ -681,10 +694,18 @@
 					break;
 			}
 			
-			Ext.getCmp('customtvs-extra-settings').expand();
+			if (!elements.default) {
+				if (undefined !== (cmp = Ext.getCmp('customtvs-extra-settings-' + type))) {
+					cmp.expand();
+				}
+			} else {
+				if (undefined !== (cmp = Ext.getCmp('customtvs-extra-settings-' + type))) {
+					cmp.collapse();
+				}
+			}
 
 			for (element in elements) {
-				if (undefined !== (elementCmp = Ext.getCmp('customtvs-extra-' + element))) {
+				if (undefined !== (elementCmp = Ext.getCmp('customtvs-extra-' + element + '-' + type))) {
 					if (elements[element]) {
 						elementCmp.show();
 					} else {
@@ -743,27 +764,18 @@
 						
 						break;
 					case 'combo':
-						element.extra = Ext.applyIf({
-							values	: Ext.decode(f.getValues().values || '[]'),
-						}, element.extra);
-						
-						break;
 					case 'checkboxgroup':
-						element.extra = Ext.applyIf({
-							values	: Ext.decode(f.getValues().values || '[]'),
-						}, element.extra);
-						
-						break;
 					case 'radiogroup':
 						element.extra = Ext.applyIf({
-							values	: Ext.decode(f.getValues().values || '[]'),
+							values	: Ext.decode(f.getValues().values || '[]')
 						}, element.extra);
-						
+
 						break;
 					case 'browser':
 						element.extra = Ext.applyIf({
-							source	: f.getValues().source,
-							openTo	: f.getValues().openTo
+							source				: f.getValues().source,
+							openTo				: f.getValues().openTo,
+							allowedFileTypes	: f.getValues().allowedFileTypes
 						}, element.extra);
 						
 						break;
@@ -896,14 +908,14 @@
 		    	title		: '{/literal}{$customtvs.grid_extra_settings}{literal}',
 				collapsible : true,
 				collapsed 	: true,
-				id			: 'customtvs-extra-settings',
+				id			: 'customtvs-extra-settings-update',
 				defaults	: {
 	                layout		: 'form',
 	                labelSeparator : ''
 	            },
 				items		: [{
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-default',
+				    id 			: 'customtvs-extra-default-update',
 				    style 		: 'padding-top: 2px',
 				    hidden 		: false,
 				    defaults	: {
@@ -911,13 +923,13 @@
 		                labelSeparator : ''
 		            },
 				    items		: [{
-			        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
+			        	xtype		: 'label',
 			            html		: '{/literal}{$customtvs.grid_no_extra_settings}{literal}',
 			            cls			: 'desc-under'
 			        }]
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-datefield',
+				    id 			: 'customtvs-extra-datefield-update',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -968,7 +980,7 @@
 					}]
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-timefield',
+				    id 			: 'customtvs-extra-timefield-update',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -1017,7 +1029,7 @@
 					}]
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-richtext',
+				    id 			: 'customtvs-extra-richtext-update',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -1085,8 +1097,8 @@
 					    }]
 					}]
 				}, {
-				    xtype		: 'customtvs-extra-combo',
-				    id 			: 'customtvs-extra-combos',
+				    xtype		: 'customtvs-combo-values',
+				    id 			: 'customtvs-extra-combos-update',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -1096,7 +1108,7 @@
 		            value 		: Ext.encode(config.record.extra.values) || '[]'
 				}, {
 				    xtype		: 'panel',
-				    id 			: 'customtvs-extra-browser',
+				    id 			: 'customtvs-extra-browser-update',
 				    style 		: 'padding-top: 15px',
 				    hidden 		: true,
 				    defaults	: {
@@ -1122,6 +1134,17 @@
 					        }, {
 					        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
 					            html		: '{/literal}{$customtvs.grid_form_element_label_source_desc}{literal}',
+					            cls			: 'desc-under'
+					        }, {
+					        	xtype		: 'textfield',
+					        	fieldLabel	: '{/literal}{$customtvs.grid_form_element_label_filetypes}{literal}',
+					        	description	: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_form_element_label_filetypes_desc}{literal}',
+					        	name		: 'allowedFileTypes',
+					        	anchor		: '100%',
+					        	value		: config.record.extra.allowedFileTypes || ''
+					        }, {
+					        	xtype		: MODx.expandHelp ? 'label' : 'hidden',
+					            html		: '{/literal}{$customtvs.grid_form_element_label_filetypes_desc}{literal}',
 					            cls			: 'desc-under'
 					        }]
 					    }, {
@@ -1150,6 +1173,8 @@
 	
 	Ext.extend(CustomTVs.window.UpdateFormElement, MODx.Window, {
 		xtype: function(event) {
+			var type = 'update';
+			
 			var elements = {
 				default 		: true,
 				datefield 		: false,
@@ -1196,10 +1221,18 @@
 					break;
 			}
 			
-			Ext.getCmp('customtvs-extra-settings').expand();
+			if (!elements.default) {
+				if (undefined !== (cmp = Ext.getCmp('customtvs-extra-settings-' + type))) {
+					cmp.expand();
+				}
+			} else {
+				if (undefined !== (cmp = Ext.getCmp('customtvs-extra-settings-' + type))) {
+					cmp.collapse();
+				}
+			}
 
 			for (element in elements) {
-				if (undefined !== (elementCmp = Ext.getCmp('customtvs-extra-' + element))) {
+				if (undefined !== (elementCmp = Ext.getCmp('customtvs-extra-' + element + '-' + type))) {
 					if (elements[element]) {
 						elementCmp.show();
 					} else {
@@ -1258,27 +1291,18 @@
 						
 						break;
 					case 'combo':
-						element.extra = Ext.applyIf({
-							values	: Ext.decode(f.getValues().values || '[]'),
-						}, element.extra);
-						
-						break;
 					case 'checkboxgroup':
-						element.extra = Ext.applyIf({
-							values	: Ext.decode(f.getValues().values || '[]'),
-						}, element.extra);
-						
-						break;
 					case 'radiogroup':
 						element.extra = Ext.applyIf({
-							values	: Ext.decode(f.getValues().values || '[]'),
+							values	: Ext.decode(f.getValues().values || '[]')
 						}, element.extra);
 						
 						break;
 					case 'browser':
 						element.extra = Ext.applyIf({
-							source	: f.getValues().source,
-							openTo	: f.getValues().openTo
+							source				: f.getValues().source,
+							openTo				: f.getValues().openTo,
+							allowedFileTypes	: f.getValues().allowedFileTypes
 						}, element.extra);
 						
 						break;
@@ -1504,10 +1528,9 @@
 	        	listeners 	: {
 		        	'select'	: function(event, record) {
 			        	var xtype = -1 == ['password', 'boolean', 'resource'].indexOf(record.data.xtype) ? '' : record.data.xtype;
-			        	
-			        	
-			        	Ext.getCmp('customtvs-grid-header').setValue(record.data.fieldLabel);
-			        	Ext.getCmp('customtvs-grid-renderer').setValue(xtype);
+
+			        	Ext.getCmp('customtvs-grid-header-create').setValue(record.data.fieldLabel);
+			        	Ext.getCmp('customtvs-grid-renderer-create').setValue(xtype);
 			        }	
 		        }
 	        }, {
@@ -1519,7 +1542,7 @@
 	        	fieldLabel	: '{/literal}{$customtvs.grid_grid_element_label_header}{literal}',
 	        	description	: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_grid_element_label_header_desc}{literal}',
 	        	name		: 'header',
-	        	id 			: 'customtvs-grid-header',
+	        	id 			: 'customtvs-grid-header-create',
 	        	anchor		: '100%',
 	        	allowBlank	: false
 	        }, {
@@ -1565,7 +1588,7 @@
 	        	fieldLabel	: '{/literal}{$customtvs.grid_grid_element_label_renderer}{literal}',
 	        	description	: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_grid_element_label_renderer_desc}{literal}',
 	        	name		: 'renderer',
-	        	id 			: 'customtvs-grid-renderer',
+	        	id 			: 'customtvs-grid-renderer-create',
 	        	anchor		: '100%',
 	        	allowBlank	: true
 	        }, {
@@ -1631,8 +1654,8 @@
 		        	'select'	: function(event, record) {
 			        	var xtype = -1 == ['password', 'boolean', 'resource'].indexOf(record.data.xtype) ? '' : record.data.xtype;
 
-			        	Ext.getCmp('customtvs-grid-header').setValue(record.data.fieldLabel);
-			        	Ext.getCmp('customtvs-grid-renderer').setValue(xtype);
+			        	Ext.getCmp('customtvs-grid-header-update').setValue(record.data.fieldLabel);
+			        	Ext.getCmp('customtvs-grid-renderer-update').setValue(xtype);
 			        }	
 		        }
 	        }, {
@@ -1644,7 +1667,7 @@
 	        	fieldLabel	: '{/literal}{$customtvs.grid_grid_element_label_header}{literal}',
 	        	description	: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_grid_element_label_header_desc}{literal}',
 	        	name		: 'header',
-	        	id 			: 'customtvs-grid-header',
+	        	id 			: 'customtvs-grid-header-update',
 	        	anchor		: '100%',
 	        	allowBlank	: false
 	        }, {
@@ -1690,7 +1713,7 @@
 	        	fieldLabel	: '{/literal}{$customtvs.grid_grid_element_label_renderer}{literal}',
 	        	description	: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_grid_element_label_renderer_desc}{literal}',
 	        	name		: 'renderer',
-	        	id			: 'customtvs-grid-renderer',
+	        	id			: 'customtvs-grid-renderer-update',
 	        	anchor		: '100%',
 	        	allowBlank	: true
 	        }, {
@@ -1772,7 +1795,7 @@
 	
 	Ext.reg('customtvs-combo-xtype', CustomTVs.combo.FieldTypes);
 	
-	CustomTVs.panel.CustomCombo = function(config) {
+	CustomTVs.combo.Values = function(config) {
 		config = config || {};
 
 	    Ext.applyIf(config, {
@@ -1783,7 +1806,7 @@
 	        	xtype		: 'hidden',
 	        	anchor		: '100%',
 	        	height		: '30',
-	        	id 			: 'customtvs-extra-combo-value',
+	        	id 			: (config.id || 'customtvs-extra-combo') + '-value',
 	        	name 		: 'values',
 	        	value 		: config.value || '[]'
 	        }],
@@ -1795,12 +1818,12 @@
 	        }
 		});
 		
-		CustomTVs.panel.CustomCombo.superclass.constructor.call(this, config);
+		CustomTVs.combo.Values.superclass.constructor.call(this, config);
 	};
 	
-	Ext.extend(CustomTVs.panel.CustomCombo, MODx.Panel, {
+	Ext.extend(CustomTVs.combo.Values, MODx.Panel, {
 		decodeData: function() {
-			var data = Ext.decode(Ext.getCmp('customtvs-extra-combo-value').getValue() || '[]');
+			var data = Ext.decode(Ext.getCmp(this.config.id + '-value').getValue() || '[]');
 
 			if (null == data || 0 == data.length) {
 				this.addElement(0, {});
@@ -1838,7 +1861,7 @@
 				});	
 			}
 			
-			Ext.getCmp('customtvs-extra-combo-value').setValue(Ext.encode(data));
+			Ext.getCmp(this.config.id + '-value').setValue(Ext.encode(data));
 		},
 		addElement: function(index, data) {
 			this.insert(index, this.getElement(index, data));
@@ -1863,7 +1886,7 @@
 					html		: '<i class="icon icon-plus"></i>',
 					style 		: 'padding: 9px; margin: 0 5px; cursor: pointer;',
 					cls 		: 'x-btn',
-					current 	: 'customtvs-extra-combo-' + id
+					current 	: this.config.id + '-' + id
 				},
 				listeners	: {
 					'render'	: function(button) {
@@ -1885,7 +1908,7 @@
 					html		: '<i class="icon icon-minus"></i>',
 					style 		: 'padding: 9px; margin: 0 5px; cursor: pointer;',
 					cls 		: 'x-btn',
-					current 	: 'customtvs-extra-combo-' + id
+					current 	: this.config.id + '-' + id
 				},
 				listeners	: {
 					'render'	: function(button) {
@@ -1903,7 +1926,7 @@
 			return {
 	            layout		: 'column',
 	            border		: false,
-	            id 			: 'customtvs-extra-combo-' + id,
+	            id 			: this.config.id + '-' + id,
 	            style		: 'margin-bottom: 5px;',
 	            defaults	: {
 	                layout		: 'form',
@@ -1948,7 +1971,7 @@
 		}	
 	});
 	
-	Ext.reg('customtvs-extra-combo', CustomTVs.panel.CustomCombo);
+	Ext.reg('customtvs-combo-values', CustomTVs.combo.Values);
 	
 	CustomTVs.combo.FormElements = function(config) {
 	    config = config || {};

@@ -75,6 +75,8 @@
 	$_lang['customtvs.grid_form_element_label_source_desc']			= 'De media bron voor de media verkenner.';
 	$_lang['customtvs.grid_form_element_label_opento']				= 'Media bron standaard map';
 	$_lang['customtvs.grid_form_element_label_opento_desc']			= 'De map waar de media verkenner standaard in geopend word.';
+	$_lang['customtvs.grid_form_element_label_filetypes']			= 'Toegestane media bron extensies';
+	$_lang['customtvs.grid_form_element_label_filetypes_desc'] 		= 'De toegestane extensies, extensies scheiden met een komma.';
 	$_lang['customtvs.grid_form_element_label_toolbar1']			= 'Toolbar 1';
 	$_lang['customtvs.grid_form_element_label_toolbar1_desc']		= 'De knoppen voor de eerste toolbar in de WYSIWYG editor.';
 	$_lang['customtvs.grid_form_element_label_toolbar2']			= 'Toolbar 2';
