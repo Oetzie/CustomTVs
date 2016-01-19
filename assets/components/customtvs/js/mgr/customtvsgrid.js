@@ -59,7 +59,7 @@ CustomTVs.grid.GridTV = function(config) {
             direction	: config.gridSortColDir || 'ASC'
         }
 	});
-	
+
 	Ext.applyIf(config, {
 	 	sm 			: sm,
 	    cm			: columns,
@@ -230,22 +230,22 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 		return false;
 	},
 	getColumnFields: function(gridElements, formElements) {
-		var columns = [{name : 'idx', type: 'string'}];
+		var columns = ['idx'];
 
 		for (var i = 0; i < gridElements.length; i++) {
-			columns.push({name: gridElements[i].dataIndex, type: 'string'});
+			columns.push(gridElements[i].dataIndex);
 		}
 
 		for (var i = 0; i < formElements.length; i++) {
 			var column = formElements[i];
 			
 			if (-1 == columns.indexOf(column.name)) {
-				columns.push({name : column.name, type: 'string'});
+				columns.push(column.name);
 			}
 				
 			if (-1 != ['combo', 'browser', 'resource'].indexOf(column.xtype)) {
 				if (-1 == columns.indexOf(column.name + '-replace')) {
-					columns.push({name : column.name + '-replace', type: 'string'});
+					columns.push(column.name + '-replace');
 				}
 			}
 		}
@@ -502,6 +502,8 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 	    for (i = 0; i <  this.getStore().data.length; i++) {
  			data.push(Ext.applyIf({idx : i}, this.getStore().data.items[i].data));
         }
+        
+        console.log(data);
         
         Ext.get('tv' + this.tvid).dom.value = Ext.encode(data); 
 

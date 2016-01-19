@@ -2123,7 +2123,7 @@
 			scope		: this
 		}
 	};
-
+	
 	MODx.load({
     	xtype		: 'panel',
     	layout		: 'form',
@@ -2202,11 +2202,10 @@
         	xtype			: 'combo-boolean',
         	fieldLabel		: '{/literal}{$customtvs.grid_label_sortable}{literal}',
         	description		: MODx.expandHelp ? '' : '{/literal}{$customtvs.grid_label_sortable_desc}{literal}',
-			name			: 'inopt_gridsortable',
 			hiddenName		: 'inopt_gridsortable',
         	anchor			: '60%',
         	allowBlank		: true,
-        	value			: 'true' == params['gridsortable'] ? 1 : 0,
+        	value			: 'true' == params['gridsortable'] || 1 == params['gridsortable'] ? 1 : 0,
         	listeners		: listeners
         }, {
         	xtype			: MODx.expandHelp ? 'label' : 'hidden',
