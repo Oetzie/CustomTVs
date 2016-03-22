@@ -27,6 +27,9 @@
 	
 	$_lang['area_customtvs']										= 'Aangepaste template variabelen';
 	
+	$_lang['resourcesgrid_snippet_limit_desc']						= 'Het maximaal aantal items. Gebruik "0" om geen limiet in te stellen, standaard is "0".';
+	$_lang['resourcesgrid_snippet_sort_desc']						= 'De volgorde waarin de items gesorteerd moeten worden.';
+	
 	$_lang['customtvs.grid_item_create']							= 'Nieuw item';
 	$_lang['customtvs.grid_item_create_quick']						= 'Snel nieuw item';
 	$_lang['customtvs.grid_item_update']							= 'Item wijzigen';

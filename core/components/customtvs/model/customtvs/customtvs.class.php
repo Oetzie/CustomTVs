@@ -37,10 +37,16 @@
 		
 		/**
 		 * @acces public.
+		 * @var Array.
+		 */
+		public $properties = array();
+		
+		/**
+		 * @acces public.
 		 * @param Object $modx.
 		 * @param Array $config.
 		*/
-		function __construct(modX &$modx, array $config = array()) {
+		public function __construct(modX &$modx, array $config = array()) {
 			$this->modx =& $modx;
 		
 			$corePath 		= $this->modx->getOption('customtvs.core_path', $config, $this->modx->getOption('core_path').'components/customtvs/');
@@ -63,7 +69,8 @@
 				'assets_path' 			=> $assetsPath,
 				'js_url' 				=> $assetsUrl.'js/',
 				'css_url' 				=> $assetsUrl.'css/',
-				'assets_url' 			=> $assetsUrl
+				'assets_url' 			=> $assetsUrl,
+				'connector_url'			=> $assetsUrl.'connector.php'
 			), $config);
 		
 			$this->modx->addPackage('customtvs', $this->config['model_path']);
@@ -75,6 +82,39 @@
 		 */
 		public function getHelpUrl() {
 			return $this->config['helpurl'];
+		}
+		
+		/**
+		 * @acces protected.
+		 * @param String $tpl.
+		 * @param Array $properties.
+		 * @param String $type.
+		 * @return String.
+		 */
+		protected function getTemplate($template, $properties = array(), $type = 'CHUNK') {
+			if (0 === strpos($template, '@')) {
+				$type 		= substr($template, 1, strpos($template, ':') - 1);
+				$template	= substr($template, strpos($template, ':') + 1, strlen($template));
+			}
+			
+			switch (strtoupper($type)) {
+				case 'INLINE':
+					$chunk = $this->modx->newObject('modChunk', array(
+						'name' => $this->config['namespace'].uniqid()
+					));
+				
+					$chunk->setCacheable(false);
+				
+					$output = $chunk->process($properties, ltrim($template));
+				
+					break;
+				case 'CHUNK':
+					$output = $this->modx->getChunk(ltrim($template), $properties);
+				
+					break;
+			}
+			
+			return $output;
 		}
 	}
 	

@@ -27,6 +27,9 @@
 	
 	$_lang['area_customtvs']										= 'Custom tvs';
 	
+	$_lang['resourcesgrid_snippet_limit_desc']						= 'The maximum number of items. Use "0" to not set an limit, default is "0".';
+	$_lang['resourcesgrid_snippet_sort_desc']						= 'The sort order of the items.';
+	
 	$_lang['customtvs.grid_item_create']							= 'Create item';
 	$_lang['customtvs.grid_item_create_quick']						= 'Quick create item';
 	$_lang['customtvs.grid_item_update']							= 'Update item';
