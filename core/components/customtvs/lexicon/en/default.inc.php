@@ -123,7 +123,7 @@
 	$_lang['customtvs.grid_default_1']								= 'Image with description';
 	$_lang['customtvs.grid_default_2']								= 'Image with description and resource';
 	$_lang['customtvs.grid_default_3']								= 'Title with description';
-	
+
 	$_lang['customtvs.textfield']									= 'Textfield';
 	$_lang['customtvs.datefield']									= 'Textfield (date)';
 	$_lang['customtvs.timefield']									= 'Textfield (time)';

@@ -81,9 +81,7 @@
 					$tvValue = $resource->getTVValue($tv);
 					$tvValue = $this->modx->fromJSON('' == $tvValue ? '[]' : $tvValue);
 					
-					if (in_array(strtoupper($this->properties['sort']), array('RAND', 'RAND()'))) {
-						shuffle($tvValue);
-					} else if (is_array($this->properties['sort'])) {
+					if (is_array($this->properties['sort'])) {
 						foreach ($this->properties['sort'] as $key => $value) {
 							if (in_array(strtoupper($value), array('ASC', 'DESC'))) {
 								$tvValueSort = array();
@@ -104,6 +102,10 @@
 								
 								$tvValue = $tvValueSort;
 							}
+						}
+					} else if (is_string($this->properties['sort'])) {
+						if (in_array(strtoupper($this->properties['sort']), array('RAND', 'RAND()'))) {
+							shuffle($tvValue);
 						}
 					}
 					

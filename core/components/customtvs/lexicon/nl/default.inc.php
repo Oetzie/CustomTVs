@@ -23,7 +23,7 @@
 	 */
 
 	$_lang['customtvs'] 											= 'Aangepaste template variabelen';
-	$_lang['customtvs.desc'] 										= 'Wijzig of maak aangepaste  template variabelen.';
+	$_lang['customtvs.desc'] 										= 'Wijzig of maak aangepaste template variabelen.';
 	
 	$_lang['area_customtvs']										= 'Aangepaste template variabelen';
 	
