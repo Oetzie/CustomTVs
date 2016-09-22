@@ -32,6 +32,7 @@
 		 */
 		public function setScriptProperties($scriptProperties = array()) {
 			$this->properties = array_merge(array(
+				'group'						=> false,
 				'limit'						=> 0,
 				'sort'						=> '{"idx": "ASC"}',
 				'tpls'						=> '{}'
@@ -168,11 +169,26 @@
 								}
 							}
 						}
-		
-						$output[] = $this->getTemplate($tpl, array_merge(array(
-							'idx'	=> $current,
-							'class'	=> implode(' ', $class)
-						), $value));
+						
+						if (false == $this->properties['group']) {
+							$output[] = $this->getTemplate($tpl, array_merge(array(
+								'idx'	=> $current,
+								'class'	=> implode(' ', $class)
+							), $value));
+						} else {
+							$group = 'no-group';
+							
+							if (isset($value[$this->properties['group']])) {
+								$group = $value[$this->properties['group']];
+								
+								unset($value[$this->properties['group']]);
+							}
+							
+							$output[$group][] = $this->getTemplate($tpl, array_merge(array(
+								'idx'	=> $current,
+								'class'	=> implode(' ', $class)
+							), $value));
+						}
 		
 						if (0 != $this->properties['limit'] && $this->properties['limit'] <= count($output)) {
 							break;
@@ -182,6 +198,15 @@
 					}
 					
 					if (0 < count($output)) {
+						if (false != $this->properties['group']) {
+							foreach ($output as $key => $value) {
+								$output[$key] = $this->getTemplate($this->properties['tplGroup'], array(
+									'output'	=> implode(PHP_EOL, $value),
+									$this->properties['group'] => $key
+								));
+							}	
+						}
+						
 						if (isset($this->properties['tplWrapper'])) {
 							$output = $this->getTemplate($this->properties['tplWrapper'], array(
 								'output'	=> implode(PHP_EOL, $output)
