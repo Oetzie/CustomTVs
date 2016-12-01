@@ -144,5 +144,6 @@
 	$_lang['customtvs.desc']										= 'Descending';
 	
 	$_lang['customtvsgrid']											= 'Grid';
+	$_lang['customtvscode']											= 'Code editor';
 	
 ?>

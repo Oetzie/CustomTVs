@@ -22,13 +22,14 @@
 	 * Suite 330, Boston, MA 02111-1307 USA
 	 */
 	
-	$customTVs = $modx->getService('customtvs', 'CustomTVs', $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'model/customtvs/');
+	$customtvs = $modx->getService('customtvs', 'CustomTVs', $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'model/customtvs/');
 
-	$modx->lexicon->load($modx->getOption('language', $customTVs->config));
-	$modx->controller->addLexiconTopic($modx->getOption('language', $customTVs->config));
+	if ($customtvs instanceof CustomTVs) {
+		$modx->smarty->assign('customtvs', $modx->lexicon->fetch('customtvs.', true));
 	
-	$modx->smarty->assign('customtvs', $modx->lexicon->fetch('customtvs.', true));
+		return $modx->smarty->fetch($customtvs->config['templates_path'].'customtvsgridinputoptions.tpl');
+	}
 	
-	return $modx->smarty->fetch($modx->getOption('templates_path', $customTVs->config).'customtvsgridinputoptions.tpl');
+	return;
 	
 ?>

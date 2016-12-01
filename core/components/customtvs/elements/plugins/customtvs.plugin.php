@@ -1,6 +1,6 @@
 <?php
 
-	/**
+    /**
 	 * Custom TVs
 	 *
 	 * Copyright 2016 by Oene Tjeerd de Bruin <info@oetzie.nl>
@@ -24,14 +24,20 @@
 
 	switch ($modx->event->name) {
 		case 'OnTVInputRenderList':
-			$modx->lexicon->load('customtvs:default');
-   		
-        	$modx->event->output($modx->getOption('core_path', null, MODX_CORE_PATH).'components/customtvs/elements/tvs/input/');
+		    $customtvs = $modx->getService('customtvs', 'CustomTVs', $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'model/customtvs/');
 
+            if ($customtvs instanceof CustomTVs) {
+    	        $modx->event->output($customtvs->config['elements_path'].'tvs/input/');
+            }
+            
 			break;
     	case 'OnTVInputPropertiesList':	
-        	$modx->event->output($modx->getOption('core_path', null, MODX_CORE_PATH).'components/customtvs/elements/tvs/inputoptions/');
+    	    $customtvs = $modx->getService('customtvs', 'CustomTVs', $modx->getOption('customtvs.core_path', null, $modx->getOption('core_path').'components/customtvs/').'model/customtvs/');
 
+            if ($customtvs instanceof CustomTVs) {
+        	    $modx->event->output($customtvs->config['elements_path'].'tvs/inputoptions/');
+            }
+            
         	break;
     	case 'OnManagerPageBefoOnTVInputRenderListreRender':
     	

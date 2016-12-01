@@ -22,13 +22,13 @@
 	 * Suite 330, Boston, MA 02111-1307 USA
 	 */
 	 
-	class CustomTVsGridInputRender extends modTemplateVarInputRender {
+	class CustomTVsCodeInputRender extends modTemplateVarInputRender {
 		/**
 		 * @acces public.
 		 * @var Object.
 		 */
 		public $customtvs = null;
-
+		
 		/**
 		 * @acces public.
 		 * @param $value Mixed.
@@ -46,36 +46,6 @@
 				});
 			</script>');
 			
-			$this->modx->regClientStartupScript($this->customtvs->config['js_url'].'mgr/customtvsgrid.js');
-			
-			$placeholders = array(
-				'formElements'		=> $this->modx->getOption('formelements', $params, '[]'),
-				'gridElements'		=> $this->modx->getOption('gridelements', $params, '[]'),
-				'gridSortCol'		=> $this->modx->getOption('gridsortcol', $params, 'idx'),
-				'gridSortColDir'	=> $this->modx->getOption('gridsortcoldir', $params, 'ASC'),
-				'gridSortable'		=> $this->modx->getOption('gridsortable', $params, false),
-				'gridCreateType'	=> $this->modx->getOption('createtype', $params, false)
-			);
-			
-			foreach ($placeholders as $key => $value) {
-				$this->setPlaceholder($key, $value);
-			}
-
-			if ($this->modx->getOption('use_editor') && $richtext = $this->modx->getOption('which_editor')) {
-				$properties = array(
-					'editor' 	=> $richtext,
-					'elements' 	=> array()
-				);
-
-				$onRichTextEditorInit = $this->modx->invokeEvent('OnRichTextEditorInit', $properties);
-	            
-	            if (is_array($onRichTextEditorInit)) {
-					$onRichTextEditorInit = implode('', $onRichTextEditorInit);
-            	}
-            	
-            	$this->setPlaceholder('onRichTextEditorInit', $onRichTextEditorInit);
-			}
-			
 			if (is_array($this->customtvs->config['lexicons'])) {
 				foreach ($this->customtvs->config['lexicons'] as $lexicon) {
 					$this->modx->controller->addLexiconTopic($lexicon);
@@ -90,10 +60,10 @@
 		 * @return String.
 		 */
 		public function getTemplate() {
-			return $this->customtvs->config['templates_path'].'customtvsgrid.tpl';
+			return $this->customtvs->config['templates_path'].'customtvscode.tpl';
 		}
 	}
 	
-	return 'CustomTVsGridInputRender';
+	return 'CustomTVsCodeInputRender';
 	
 ?>

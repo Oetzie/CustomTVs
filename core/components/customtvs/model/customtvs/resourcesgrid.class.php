@@ -33,6 +33,7 @@
 		public function setScriptProperties($scriptProperties = array()) {
 			$this->properties = array_merge(array(
 				'group'						=> false,
+				'renders'					=> false,
 				'limit'						=> 0,
 				'sort'						=> '{"idx": "ASC"}',
 				'tpls'						=> '{}'
@@ -118,9 +119,20 @@
 							if (preg_match('/-replace$/si', $subKey)) {
 								unset($value[$subKey]);
 							} else {
-								if (is_array($subValue)) {
-									$value[$subKey] = implode(',', $subValue);
+								if ('content' == $subKey && isset($value['render'])) {
+									if (false !== ($renders = $this->properties['renders'])) {
+										$subValue = $this->modx->runSnippet($renders, array(
+											'value' 	=> $subValue,
+											'render'	=> $value['render']
+										));
+									}
 								}
+								
+								if (is_array($subValue)) {
+									$subValue = implode(',', $subValue);
+								}
+								
+								$value[$subKey] = $subValue;
 							}
 						}
 						

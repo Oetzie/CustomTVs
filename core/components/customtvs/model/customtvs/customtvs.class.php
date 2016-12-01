@@ -56,7 +56,7 @@
 			$this->config = array_merge(array(
 				'namespace'				=> $this->modx->getOption('namespace', $config, 'customtvs'),
 				'helpurl'				=> $this->modx->getOption('namespace', $config, 'customtvs'),
-				'language'				=> 'customtvs:default',
+				'lexicons'				=> array('customtvs:default'),
 				'base_path'				=> $corePath,
 				'core_path' 			=> $corePath,
 				'model_path' 			=> $corePath.'model/',
@@ -74,6 +74,14 @@
 			), $config);
 		
 			$this->modx->addPackage('customtvs', $this->config['model_path']);
+			
+			if (is_array($this->config['lexicons'])) {
+				foreach ($this->config['lexicons'] as $lexicon) {
+					$this->modx->lexicon->load($lexicon);
+				}
+			} else {
+				$this->modx->lexicon->load($this->config['lexicons']);
+			}
 		}
 		
 		/**
