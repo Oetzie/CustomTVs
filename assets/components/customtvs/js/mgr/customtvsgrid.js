@@ -212,6 +212,12 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 						}, column);
 
 						break;
+					case 'active':
+						column = Ext.applyIf({
+							renderer	: this.renderActive
+						}, column);
+
+						break;
 				}
 			}
 				
@@ -496,6 +502,11 @@ Ext.extend(CustomTVs.grid.GridTV, MODx.grid.LocalGrid, {
 
     	return d;
 	},
+	renderActive: function(d, c, e) {
+    	c.css = 1 == parseInt(d) || d ? 'green' : 'red';
+    	
+    	return 1 == parseInt(d) || d ? _('yes') : _('no');
+    },
     encodeData: function() {
     	var data = [];
 

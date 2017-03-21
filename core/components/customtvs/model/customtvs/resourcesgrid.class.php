@@ -113,7 +113,8 @@
 					
 					$current 	= 0;
 					$output 	= array();
-	
+					$newValue 	= array();
+					
 					foreach ($tvValue as $key => $value) {
 						foreach ($value as $subKey => $subValue) {
 							if (preg_match('/-replace$/si', $subKey)) {
@@ -126,6 +127,10 @@
 											'render'	=> $value['render']
 										));
 									}
+								} else if ('active' == $subKey) {
+									if (!(bool) $subValue) {
+										continue 2;
+									}
 								}
 								
 								if (is_array($subValue)) {
@@ -136,17 +141,21 @@
 							}
 						}
 						
+						$newValue[] = $value;
+					}
+					
+					foreach ($newValue as $key => $value) {
 						$class = array();
 
-						if (0 == $current) {
+						if (0 == $key) {
 							$class[] = 'first';
 						}
 						
-						if (count($tvValue) - 1 == $current || (0 != $this->properties['limit'] && $this->properties['limit'] - 1 == $current)) {
+						if (count($newValue) - 1 == $key || (0 != $this->properties['limit'] && $this->properties['limit'] - 1 == $key)) {
 							$class[] = 'last';
 						}
 						
-						$class[] = 0 == $current % 2 ? 'odd' : 'even';
+						$class[] = 0 == $key % 2 ? 'odd' : 'even';
 						
 						$tpl = $this->properties['tpl'];
 						
@@ -228,7 +237,11 @@
 						}
 						
 						if (isset($this->properties['toPlaceholder'])) {
-							$this->modx->setPlaceholder($this->properties['toPlaceholder'], $output);
+							if (!empty($this->properties['toPlaceholder'])) {
+								$this->modx->setPlaceholder($this->properties['toPlaceholder'], $output);
+							} else {
+								return $output;
+							}
 						} else {
 							return $output;
 						}

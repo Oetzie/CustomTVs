@@ -115,6 +115,7 @@
 	$_lang['customtvs.grid_render_password']						= 'Wachtwoord';
 	$_lang['customtvs.grid_render_boolean']							= 'Ja/nee';
 	$_lang['customtvs.grid_render_resource']						= 'Pagina';
+	$_lang['customtvs.grid_render_active']							= 'Actief';
 	$_lang['customtvs.grid_no_render']								= 'Geen render';
 	$_lang['customtvs.grid_default_select']							= 'Selecteer een standaard formulier';
 	$_lang['customtvs.grid_default_title']							= 'Standaard formulier instellen';

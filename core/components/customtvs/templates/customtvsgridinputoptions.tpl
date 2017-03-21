@@ -1499,7 +1499,8 @@
 				'tag'		: '{/literal}{$customtvs.grid_render_tag}{literal}',
 				'password'	: '{/literal}{$customtvs.grid_render_password}{literal}',
 				'boolean'	: '{/literal}{$customtvs.grid_render_boolean}{literal}',
-	            'resource'	: '{/literal}{$customtvs.grid_render_resource}{literal}'
+	            'resource'	: '{/literal}{$customtvs.grid_render_resource}{literal}',
+	            'active'	: '{/literal}{$customtvs.grid_render_active}{literal}'
 	        };
 	        
 	        return renders[a];
@@ -2070,7 +2071,8 @@
 					['tag', '{/literal}{$customtvs.grid_render_tag}{literal}'],
 					['password', '{/literal}{$customtvs.grid_render_password}{literal}'],
 					['boolean', '{/literal}{$customtvs.grid_render_boolean}{literal}'],
-	                ['resource', '{/literal}{$customtvs.grid_render_resource}{literal}']
+	                ['resource', '{/literal}{$customtvs.grid_render_resource}{literal}'],
+	                ['active', '{/literal}{$customtvs.grid_render_active}{literal}']
 	            ]
 	        }),
 	        remoteSort	: ['label', 'asc'],
